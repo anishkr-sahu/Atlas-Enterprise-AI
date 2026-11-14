@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Atlas | Enterprise Knowledge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css?v=ui-refresh-1">
+</head>
+<body>
+  <div class="ambient-glow" aria-hidden="true"></div>
+
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">✦</div>
+        <div class="brand-text">
+          <span class="brand-name">ATLAS</span>
+          <small>Enterprise AI</small>
+        </div>
+      </div>
+
+      <div class="eyebrow">WORKSPACE</div>
+      <nav class="nav-group" aria-label="Primary Navigation">
+        <button class="nav active" id="chatTab">
+          <span class="nav-icon">◈</span>
+          <span>Knowledge chat</span>
+        </button>
+        <button class="nav" id="docsTab">
+          <span class="nav-icon">▤</span>
+          <span>Documents</span>
+        </button>
+        <button class="nav" id="approvalTab">
+          <span class="nav-icon">✓</span>
+          <span>Approvals</span>
+          <span class="nav-badge hidden" id="pendingBadge">0</span>
+        </button>
+        <button class="nav" id="adminTab">
+          <span class="nav-icon">◫</span>
+          <span>Metrics</span>
+        </button>
+      </nav>
+
+      <div class="sidebottom">
+        <div class="workspace-status">
+          <span class="status-dot"></span>
+          <div>
+            <strong>Demo Workspace</strong>
+            <span>Single-tenant · No login</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <header>
+        <div>
+          <span class="eyebrow">YOUR WORKSPACE / KNOWLEDGE</span>
+          <h1 id="heading">Ask your organization's knowledge</h1>
+        </div>
+        <div class="pill">
+          <span class="pulse-dot"></span> AWS-powered
+        </div>
+      </header>
+
+      <!-- CHAT VIEW -->
+      <section id="chatView" class="panel">
+        <div class="chat-toolbar">
+          <span class="toolbar-label">Verified RAG Pipeline</span>
+          <button type="button" id="newChat" class="btn-ghost">
+            <span>+</span> New conversation
+          </button>
+        </div>
+
+        <div class="hero" id="chatHero">
+          <div class="spark-ring">
+            <div class="spark">✦</div>
+          </div>
+          <h2>What can I help you find?</h2>
+          <p>Ask questions across your approved company knowledge base. Every response is grounded in cited evidence.</p>
+          <div class="suggestions">
+            <button type="button" class="chip" data-q="What is our leave policy?">
+              <span class="chip-icon">🗓️</span> Leave policy <span class="arrow">↗</span>
+            </button>
+            <button type="button" class="chip" data-q="Summarize the onboarding process">
+              <span class="chip-icon">🚀</span> Onboarding process <span class="arrow">↗</span>
+            </button>
+            <button type="button" class="chip" data-q="What are the IT security rules?">
+              <span class="chip-icon">🛡️</span> IT security rules <span class="arrow">↗</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="messages" aria-live="polite"></div>
+
+        <div class="composer-wrap">
+          <form id="chatForm" class="composer">
+            <textarea id="question" rows="1" placeholder="Ask a question about company knowledge... (Enter to send, Shift+Enter for new line)" required></textarea>
+            <button type="submit" id="sendBtn" class="btn-primary">
+              <span>Send</span>
+              <span class="send-arrow">↗</span>
+            </button>
+          </form>
+          <div class="hint">AI-generated answers may contain inaccuracies. Always verify cited source passages before acting.</div>
+        </div>
+      </section>
+
+      <!-- DOCUMENTS VIEW -->
+      <section id="docsView" class="panel hidden">
+        <div class="section-header">
+          <div>
+            <h2>Knowledge library</h2>
+            <p>Upload approved PDF, DOCX, TXT, or Markdown files (max 10 MB). Use non-sensitive demo documents only.</p>
+          </div>
+        </div>
+
+        <form id="uploadForm" class="upload-zone">
+          <input id="file" type="file" accept=".pdf,.docx,.txt,.md" required>
+          <div class="upload-prompt" id="uploadPrompt">
+            <div class="upload-icon">📄</div>
+            <div>
+              <strong id="fileLabel">Click to choose a file or drag & drop here</strong>
+              <span>Supports PDF, DOCX, TXT, MD up to 10 MB</span>
+            </div>
+          </div>
+          <button type="submit" id="uploadBtn" class="btn-primary">Upload & Index</button>
+        </form>
+
+        <div class="list-header">
+          <span>Indexed Documents</span>
+          <span id="docCount" class="muted-text"></span>
+        </div>
+        <div id="docs" class="doc-grid"></div>
+      </section>
+
+      <!-- APPROVALS VIEW -->
+      <section id="approvalView" class="panel hidden">
+        <div class="section-header">
+          <div>
+            <h2>Human-in-the-loop approvals</h2>
+            <p>Review sensitive action requests. Approving records an audit decision only; no document is deleted or exported.</p>
+          </div>
+          <button type="button" id="refreshApprovals" class="btn-ghost">↻ Refresh</button>
+        </div>
+        <div id="approvalSummary" role="status"></div>
+        <div id="approvalList" aria-live="polite"></div>
+      </section>
+
+      <!-- METRICS VIEW -->
+      <section id="adminView" class="panel hidden">
+        <div class="section-header">
+          <div>
+            <h2>Workspace metrics</h2>
+            <p>Real-time system throughput, retrieval performance, and safety guardrail telemetry.</p>
+          </div>
+        </div>
+
+        <div id="metricsCards" class="kpi-grid"></div>
+
+        <h3 class="sub-heading">Guardrail events</h3>
+        <div id="guardrailCards" class="kpi-grid"></div>
+
+        <details class="raw-json-toggle">
+          <summary>View raw telemetry JSON</summary>
+          <div class="raw-grid">
+            <div>
+              <span class="eyebrow">METRICS PAYLOAD</span>
+              <pre id="metrics">Loading metrics...</pre>
+            </div>
+            <div>
+              <span class="eyebrow">GUARDRAILS PAYLOAD</span>
+              <pre id="guardrailMetrics">Loading guardrail metrics...</pre>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <div id="toast" role="status"></div>
+    </main>
+  </div>
+
+  <script src="/static/js/app.js?v=ui-refresh-1"></script>
+</body>
+</html>
