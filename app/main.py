@@ -25,7 +25,6 @@ app.mount('/static',StaticFiles(directory=BASE/'static'),name='static')
 templates=Jinja2Templates(directory=BASE/'templates')
 
 
-
 class Upload(BaseModel):
     filename:str=Field(min_length=1,max_length=180)
 
