@@ -1,4 +1,3 @@
-
 name: Atlas Enterprise AI CI/CD
 
 on:
@@ -68,7 +67,7 @@ jobs:
       - name: Build and Push Docker Image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           set -euo pipefail
@@ -111,6 +110,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       # ----------------------------------------
@@ -120,19 +120,16 @@ jobs:
       - name: Construct ECR Image URI
         id: image
         env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           set -euo pipefail
 
-          ACCOUNT_ID=$(aws sts get-caller-identity \
-            --query Account \
-            --output text)
+          test -n "$ECR_REGISTRY"
+          test -n "$ECR_REPOSITORY"
 
-          REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-
-          IMAGE="${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+          IMAGE="${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
 
           echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
           echo "ECR image URI constructed successfully"
@@ -313,6 +310,12 @@ jobs:
             --retry 5 \
             --retry-delay 3 \
             http://127.0.0.1:8000/ \
+            > /dev/null
+
+          curl --fail --silent --show-error \
+            --retry 5 \
+            --retry-delay 3 \
+            http://127.0.0.1:8000/health/ready \
             > /dev/null
 
           echo "Atlas Enterprise AI deployed successfully"
